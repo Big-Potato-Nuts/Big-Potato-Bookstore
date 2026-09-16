@@ -23,7 +23,7 @@ public final class CommonConstant {
     // ==================== 封禁功能位掩码（ban_flags） ====================
     /** 未封禁 */
     public static final int BAN_NONE = 0;
-    /** 封禁登录（全功能，等同于 status=0） */
+    /** 禁止登录（仅永久封禁使用，用户完全无法登录） */
     public static final int BAN_LOGIN = 1;
     /** 封禁评论 */
     public static final int BAN_COMMENT = 2;
@@ -35,6 +35,8 @@ public final class CommonConstant {
     public static final int BAN_AUTHOR_WARNING = 16;
     /** 封禁写书（禁止上传/编辑书籍和章节） */
     public static final int BAN_AUTHOR_WRITE = 32;
+    /** 全功能限制（可登录但所有功能操作均被禁止，用于有时限的账号封禁） */
+    public static final int BAN_ALL_FUNCTIONS = 64;
 
     /** 封禁时长：永久（banDays = -1） */
     public static final int BAN_DAYS_FOREVER = -1;

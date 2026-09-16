@@ -7,6 +7,8 @@ import org.example.common.result.Result;
 import org.example.dto.ApplyAuthorDTO;
 import org.example.dto.BookSaveDTO;
 import org.example.dto.BookStatusDTO;
+import org.example.dto.BookWithChaptersDTO;
+import org.example.dto.ChapterImportDTO;
 import org.example.dto.ChapterSaveDTO;
 import org.example.service.AuthorService;
 import org.example.vo.AuthorApplyVO;
@@ -87,6 +89,19 @@ public class AuthorController {
     @PostMapping("/book/{id}/resubmit")
     public Result<BookVO> resubmitBook(@PathVariable Long id) {
         return Result.ok("已重新提交审核", authorService.resubmitBook(id));
+    }
+
+    /** 新建作品（含章节），一次性创建书籍和所有章节 */
+    @PostMapping("/book/with-chapters")
+    public Result<BookVO> createBookWithChapters(@Valid @RequestBody BookWithChaptersDTO dto) {
+        return Result.ok("创建成功", authorService.createBookWithChapters(dto));
+    }
+
+    /** 从纯文本导入章节，按「第X章」格式自动拆分 */
+    @PostMapping("/chapter/import")
+    public Result<Integer> importChapters(@Valid @RequestBody ChapterImportDTO dto) {
+        int count = authorService.importChapters(dto);
+        return Result.ok("成功导入 " + count + " 章", count);
     }
 
     /** 作品章节列表 */

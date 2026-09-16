@@ -12,7 +12,7 @@ CREATE TABLE `user` (
   `role` TINYINT NOT NULL DEFAULT 0 COMMENT '角色:0读者/1作者/2管理员',
   `balance` INT NOT NULL DEFAULT 0 COMMENT '余额(单位:分)',
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态:1正常/0禁用',
-  `ban_flags` INT NOT NULL DEFAULT 0 COMMENT '封禁功能位掩码: bit0(1)=登录/全功能, bit1(2)=评论, bit2(4)=点赞, bit3(8)=阅读购买',
+  `ban_flags` INT NOT NULL DEFAULT 0 COMMENT '封禁功能位掩码: bit0(1)=禁止登录, bit1(2)=评论, bit2(4)=点赞, bit3(8)=阅读购买, bit4(16)=作者警告, bit5(32)=封禁写书, bit6(64)=全功能限制(可登录)',
   `ban_expire_time` DATETIME DEFAULT NULL COMMENT '封禁到期时间(NULL=永久)',
   `ban_reason` VARCHAR(255) DEFAULT NULL COMMENT '封禁原因',
   `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

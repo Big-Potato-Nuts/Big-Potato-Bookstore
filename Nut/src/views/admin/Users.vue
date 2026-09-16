@@ -108,7 +108,8 @@
         </el-form-item>
         <el-form-item label="限制功能" required>
           <el-checkbox-group v-model="banForm.banFlagsList">
-            <el-checkbox :value="1">封禁登录（全功能，无法登录）</el-checkbox>
+            <el-checkbox :value="1">禁止登录（永久，无法登录）</el-checkbox>
+            <el-checkbox :value="64">全功能限制（可登录但不可操作）</el-checkbox>
             <el-checkbox :value="2">封禁评论</el-checkbox>
             <el-checkbox :value="4">封禁点赞</el-checkbox>
             <el-checkbox :value="8">封禁阅读/购买</el-checkbox>
@@ -293,10 +294,10 @@ async function onAction(cmd, row) {
       await quickBan(row, 6, 30, '多次违规，封禁评论和点赞30天')
       break
     case 'banAccount7':
-      await quickBan(row, 1, 7, '严重违规，封禁账号7天')
+      await quickBan(row, 64, 7, '严重违规，全功能限制7天（可登录但不可操作）')
       break
     case 'banAccount30':
-      await quickBan(row, 1, 30, '严重违规，封禁账号30天')
+      await quickBan(row, 64, 30, '严重违规，全功能限制30天（可登录但不可操作）')
       break
     // 作者处罚
     case 'authorWarning7':
@@ -307,7 +308,7 @@ async function onAction(cmd, row) {
       break
     // 通用
     case 'banForever':
-      await quickBan(row, 1, -1, '严重违规，永久封禁')
+      await quickBan(row, 1, -1, '严重违规，永久封禁，禁止登录')
       break
     case 'unban':
       if (row.status === 0) {
@@ -322,7 +323,8 @@ async function onAction(cmd, row) {
 /** 快捷封禁（带确认弹窗） */
 async function quickBan(row, banFlags, banDays, banReason) {
   const flagText = []
-  if (banFlags & 1) flagText.push('登录(全功能)')
+  if (banFlags & 1) flagText.push('禁止登录')
+  if (banFlags & 64) flagText.push('全功能限制(可登录)')
   if (banFlags & 2) flagText.push('评论')
   if (banFlags & 4) flagText.push('点赞')
   if (banFlags & 8) flagText.push('阅读购买')

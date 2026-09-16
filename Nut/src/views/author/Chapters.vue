@@ -7,7 +7,16 @@
         </el-button>
         {{ bookTitle }} · 章节管理
       </div>
-      <el-button type="primary" :icon="Plus" @click="$router.push(`/author/books/${bookId}/chapters/new`)">新建章节</el-button>
+      <div class="toolbar-right">
+        <el-upload
+          :show-file-list="false"
+          :before-upload="beforeTxtUpload"
+          accept=".txt"
+        >
+          <el-button :icon="Upload">导入 TXT</el-button>
+        </el-upload>
+        <el-button type="primary" :icon="Plus" @click="$router.push(`/author/books/${bookId}/chapters/new`)">新建章节</el-button>
+      </div>
     </div>
 
     <el-table v-loading="loading" :data="chapters" stripe style="width: 100%">
@@ -43,6 +52,39 @@
         </el-empty>
       </template>
     </el-table>
+
+    <!-- TXT 导入预览弹窗 -->
+    <el-dialog v-model="importVisible" title="TXT 导入预览" width="640px">
+      <div v-if="importPreview.length" class="import-preview">
+        <p class="muted">共识别到 <strong>{{ importPreview.length }}</strong> 个章节，确认后将追加到本书：</p>
+        <div class="import-list">
+          <div v-for="(ch, idx) in importPreview" :key="idx" class="import-chapter-item">
+            <span class="import-chapter-title">{{ idx + 1 }}. {{ ch.title }}</span>
+            <span class="muted">{{ ch.content.length }} 字</span>
+          </div>
+        </div>
+        <div class="import-settings" style="margin-top: 16px">
+          <el-radio-group v-model="importIsFree" size="small">
+            <el-radio :value="1">全部免费</el-radio>
+            <el-radio :value="0">全部付费</el-radio>
+          </el-radio-group>
+          <el-input-number
+            v-if="importIsFree === 0"
+            v-model="importPrice"
+            :min="1"
+            :max="9999"
+            size="small"
+            placeholder="价格(分)"
+            style="width: 140px; margin-left: 12px"
+          />
+        </div>
+      </div>
+      <el-empty v-else description="未能识别到章节，请确保 TXT 中包含「第X章」格式的标题" :image-size="60" />
+      <template #footer>
+        <el-button @click="importVisible = false">取消</el-button>
+        <el-button type="primary" :disabled="!importPreview.length" :loading="importing" @click="confirmImport">确认导入</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -50,8 +92,8 @@
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
-import { authorChapters, deleteChapter } from '@/api/author'
+import { Plus, Upload } from '@element-plus/icons-vue'
+import { authorChapters, deleteChapter, importChapters } from '@/api/author'
 import { bookDetail } from '@/api/book'
 import { fenToYuan, formatTime, formatWords } from '@/utils/format'
 
@@ -61,6 +103,72 @@ const bookId = Number(route.params.id)
 const chapters = ref([])
 const bookTitle = ref('')
 const loading = ref(false)
+
+// TXT 导入
+const importVisible = ref(false)
+const importPreview = ref([])
+const importIsFree = ref(1)
+const importPrice = ref(null)
+const importing = ref(false)
+
+function beforeTxtUpload(file) {
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    const text = e.target.result
+    importPreview.value = parseChapters(text)
+    importIsFree.value = 1
+    importPrice.value = null
+    importVisible.value = true
+  }
+  reader.readAsText(file, 'UTF-8')
+  return false
+}
+
+function parseChapters(text) {
+  const result = []
+  if (!text) return result
+  const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+  const regex = /^(第[一二三四五六七八九十百千万零〇\d]+[章节卷回集部篇]|Chapter\s+\d+|第\d+章).*$/gm
+  const matches = []
+  let m
+  while ((m = regex.exec(normalized)) !== null) {
+    matches.push({ start: m.index, end: m.index + m[0].length })
+  }
+  if (matches.length === 0) return result
+  for (let i = 0; i < matches.length; i++) {
+    const titleStart = matches[i].start
+    const titleEnd = matches[i].end
+    const contentEnd = i + 1 < matches.length ? matches[i + 1].start : normalized.length
+    const title = normalized.substring(titleStart, titleEnd).trim()
+    const content = normalized.substring(titleEnd, contentEnd).trim()
+    if (content) {
+      result.push({ title, content })
+    }
+  }
+  return result
+}
+
+async function confirmImport() {
+  if (importIsFree.value === 0 && (!importPrice.value || importPrice.value <= 0)) {
+    ElMessage.warning('付费章节请设置价格')
+    return
+  }
+  importing.value = true
+  try {
+    const count = await importChapters({
+      bookId,
+      text: importPreview.value.map(ch => ch.title + '\n' + ch.content).join('\n\n'),
+      isFree: importIsFree.value,
+      price: importIsFree.value === 0 ? importPrice.value : null
+    })
+    ElMessage.success(`成功导入 ${count} 章`)
+    importVisible.value = false
+    importPreview.value = []
+    load()
+  } catch (e) { /* 全局提示 */ } finally {
+    importing.value = false
+  }
+}
 
 async function load() {
   loading.value = true
@@ -108,7 +216,34 @@ onMounted(() => {
   justify-content: space-between;
   margin-bottom: 16px;
 }
+.toolbar-right {
+  display: flex;
+  gap: 10px;
+}
 .no-margin {
   margin: 0;
+}
+.import-preview p {
+  margin: 0 0 12px;
+}
+.import-list {
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  padding: 8px;
+}
+.import-chapter-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 13px;
+}
+.import-chapter-item:last-child {
+  border-bottom: none;
+}
+.import-chapter-title {
+  font-weight: 500;
 }
 </style>

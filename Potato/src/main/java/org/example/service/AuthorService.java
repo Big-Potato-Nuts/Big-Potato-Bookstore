@@ -10,6 +10,8 @@ import org.example.common.util.MaskUtil;
 import org.example.dto.ApplyAuthorDTO;
 import org.example.dto.BookSaveDTO;
 import org.example.dto.BookStatusDTO;
+import org.example.dto.BookWithChaptersDTO;
+import org.example.dto.ChapterImportDTO;
 import org.example.dto.ChapterSaveDTO;
 import org.example.entity.Author;
 import org.example.entity.Book;
@@ -194,6 +196,143 @@ public class AuthorService {
         book.setStatus(CommonConstant.BOOK_STATUS_PENDING);
         bookMapper.updateById(book);
         return toBookVO(book);
+    }
+
+    /** 新建作品（含章节），一个事务中创建书籍和所有章节 */
+    @Transactional(rollbackFor = Exception.class)
+    public BookVO createBookWithChapters(BookWithChaptersDTO dto) {
+        Author author = requireAuthor();
+        banService.checkAuthorWriteBan(author.getUserId());
+        requireCategory(dto.getCategoryId());
+
+        // 1. 创建书籍
+        Book book = new Book();
+        book.setAuthorId(author.getId());
+        book.setCategoryId(dto.getCategoryId());
+        book.setTitle(dto.getTitle());
+        book.setCover(dto.getCover());
+        book.setIntro(dto.getIntro());
+        if (banService.isAuthorWarning(author.getUserId())) {
+            book.setStatus(CommonConstant.BOOK_STATUS_PENDING);
+        } else {
+            book.setStatus(CommonConstant.BOOK_STATUS_SERIALIZING);
+        }
+        book.setIsRecommend(0);
+        book.setClickCount(0);
+        book.setCollectCount(0);
+        bookMapper.insert(book);
+
+        // 2. 批量创建章节
+        if (dto.getChapters() != null && !dto.getChapters().isEmpty()) {
+            int sort = 1;
+            for (BookWithChaptersDTO.ChapterItem item : dto.getChapters()) {
+                Chapter chapter = new Chapter();
+                chapter.setBookId(book.getId());
+                chapter.setTitle(item.getTitle());
+                chapter.setContent(item.getContent());
+                chapter.setSort(sort++);
+                chapter.setReadCount(0);
+                chapter.setPayCount(0);
+                // 免费/付费
+                Integer isFree = item.getIsFree() == null ? 1 : item.getIsFree();
+                if (Integer.valueOf(CommonConstant.CHAPTER_FREE).equals(isFree)) {
+                    chapter.setIsFree(CommonConstant.CHAPTER_FREE);
+                    chapter.setPrice(0);
+                } else {
+                    if (item.getPrice() == null || item.getPrice() <= 0) {
+                        throw new BusinessException(400, "付费章节「" + item.getTitle() + "」必须设置价格且大于 0");
+                    }
+                    chapter.setIsFree(CommonConstant.CHAPTER_PAID);
+                    chapter.setPrice(item.getPrice());
+                }
+                chapterMapper.insert(chapter);
+            }
+        }
+        return toBookVO(book);
+    }
+
+    /** 从纯文本导入章节，按章节标题自动拆分 */
+    @Transactional(rollbackFor = Exception.class)
+    public int importChapters(ChapterImportDTO dto) {
+        Book book = requireOwnedBook(dto.getBookId());
+        banService.checkAuthorWriteBan(StpUtil.getLoginIdAsLong());
+        if (Integer.valueOf(CommonConstant.BOOK_STATUS_PENDING).equals(book.getStatus())) {
+            throw new BusinessException(400, "书籍正在审核中，无法添加章节");
+        }
+
+        // 解析文本，按章节标题拆分
+        List<String[]> chapters = parseChapterText(dto.getText());
+        if (chapters.isEmpty()) {
+            throw new BusinessException(400, "未能识别到章节，请确保文本中包含「第X章」格式的章节标题");
+        }
+
+        int startSort = chapterMapper.selectMaxSort(dto.getBookId()) + 1;
+        int count = 0;
+        for (String[] ch : chapters) {
+            Chapter chapter = new Chapter();
+            chapter.setBookId(dto.getBookId());
+            chapter.setTitle(ch[0]);
+            chapter.setContent(ch[1]);
+            chapter.setSort(startSort + count);
+            chapter.setReadCount(0);
+            chapter.setPayCount(0);
+            Integer isFree = dto.getIsFree() == null ? 1 : dto.getIsFree();
+            if (Integer.valueOf(CommonConstant.CHAPTER_FREE).equals(isFree)) {
+                chapter.setIsFree(CommonConstant.CHAPTER_FREE);
+                chapter.setPrice(0);
+            } else {
+                if (dto.getPrice() == null || dto.getPrice() <= 0) {
+                    throw new BusinessException(400, "付费章节必须设置价格且大于 0");
+                }
+                chapter.setIsFree(CommonConstant.CHAPTER_PAID);
+                chapter.setPrice(dto.getPrice());
+            }
+            chapterMapper.insert(chapter);
+            count++;
+        }
+        return count;
+    }
+
+    /**
+     * 解析纯文本，按章节标题拆分
+     * 支持格式：第X章、第X节、第一章、第一节、Chapter X 等
+     * 返回 List<String[2]>，每个元素为 [标题, 正文]
+     */
+    private List<String[]> parseChapterText(String text) {
+        List<String[]> result = new ArrayList<>();
+        if (text == null || text.isBlank()) {
+            return result;
+        }
+        // 统一换行符
+        String normalized = text.replace("\r\n", "\n").replace("\r", "\n");
+        // 章节标题正则：第X章/第X节/第一章/第一节/Chapter X/卷X
+        String regex = "(?m)^(第[一二三四五六七八九十百千万零〇\\d]+[章节卷回集部篇]|Chapter\\s+\\d+|第\\d+章).*$";
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex);
+        java.util.regex.Matcher matcher = pattern.matcher(normalized);
+
+        List<int[]> matches = new ArrayList<>();
+        while (matcher.find()) {
+            matches.add(new int[]{matcher.start(), matcher.end()});
+        }
+
+        if (matches.isEmpty()) {
+            return result;
+        }
+
+        for (int i = 0; i < matches.size(); i++) {
+            int titleStart = matches.get(i)[0];
+            int titleEnd = matches.get(i)[1];
+            int contentEnd = (i + 1 < matches.size()) ? matches.get(i + 1)[0] : normalized.length();
+
+            String title = normalized.substring(titleStart, titleEnd).trim();
+            String content = normalized.substring(titleEnd, contentEnd).trim();
+
+            // 跳过空内容的章节
+            if (!content.isBlank()) {
+                result.add(new String[]{title, content});
+            }
+        }
+        return result;
     }
 
     // ==================== 章节管理 ====================

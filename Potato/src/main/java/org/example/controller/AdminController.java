@@ -6,6 +6,7 @@ import org.example.common.result.PageResult;
 import org.example.common.result.Result;
 import org.example.dto.AuditDTO;
 import org.example.dto.AppealHandleDTO;
+import org.example.dto.BookRecommendDTO;
 import org.example.dto.BookStatusDTO;
 import org.example.dto.CategorySaveDTO;
 import org.example.dto.CommentStatusDTO;
@@ -114,6 +115,13 @@ public class AdminController {
     @PutMapping("/book/{id}/status")
     public Result<Void> updateBookStatus(@PathVariable Long id, @Valid @RequestBody BookStatusDTO dto) {
         adminService.updateBookStatus(id, dto);
+        return Result.ok("操作成功", null);
+    }
+
+    /** 设置/取消小说推荐位 */
+    @PutMapping("/book/{id}/recommend")
+    public Result<Void> updateBookRecommend(@PathVariable Long id, @Valid @RequestBody BookRecommendDTO dto) {
+        adminService.updateBookRecommend(id, dto);
         return Result.ok("操作成功", null);
     }
 

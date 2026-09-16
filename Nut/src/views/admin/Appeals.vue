@@ -86,7 +86,8 @@
         </el-form-item>
         <el-form-item label="限制功能" required>
           <el-checkbox-group v-model="reduceForm.banFlagsList">
-            <el-checkbox :value="1">封禁登录（全功能）</el-checkbox>
+            <el-checkbox :value="1">禁止登录（永久）</el-checkbox>
+            <el-checkbox :value="64">全功能限制（可登录）</el-checkbox>
             <el-checkbox :value="2">封禁评论</el-checkbox>
             <el-checkbox :value="4">封禁点赞</el-checkbox>
             <el-checkbox :value="8">封禁阅读购买</el-checkbox>

@@ -78,10 +78,13 @@ public class UserVO {
         }
         StringBuilder sb = new StringBuilder();
         int flags = user.getBanFlags();
-        if ((flags & 1) != 0) sb.append("全功能封禁");
+        if ((flags & 1) != 0) sb.append("禁止登录");
+        if ((flags & 64) != 0) sb.append(sb.length() > 0 ? "、" : "").append("全功能限制");
         if ((flags & 2) != 0) sb.append(sb.length() > 0 ? "、" : "").append("评论封禁");
         if ((flags & 4) != 0) sb.append(sb.length() > 0 ? "、" : "").append("点赞封禁");
         if ((flags & 8) != 0) sb.append(sb.length() > 0 ? "、" : "").append("阅读购买封禁");
+        if ((flags & 16) != 0) sb.append(sb.length() > 0 ? "、" : "").append("作者警告");
+        if ((flags & 32) != 0) sb.append(sb.length() > 0 ? "、" : "").append("封禁写书");
         if (user.getBanExpireTime() == null) {
             sb.append("（永久）");
         } else {

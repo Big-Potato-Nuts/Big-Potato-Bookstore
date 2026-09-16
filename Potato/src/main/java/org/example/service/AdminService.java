@@ -10,6 +10,7 @@ import org.example.common.exception.BusinessException;
 import org.example.common.result.PageResult;
 import org.example.common.util.MaskUtil;
 import org.example.dto.AuditDTO;
+import org.example.dto.BookRecommendDTO;
 import org.example.dto.BookStatusDTO;
 import org.example.dto.CategorySaveDTO;
 import org.example.dto.CommentStatusDTO;
@@ -171,10 +172,13 @@ public class AdminService {
     /** 构建封禁描述文本 */
     private String buildBanDesc(int banFlags, Integer banDays) {
         StringBuilder sb = new StringBuilder("封禁功能：");
-        if ((banFlags & CommonConstant.BAN_LOGIN) != 0) sb.append("登录(全功能) ");
+        if ((banFlags & CommonConstant.BAN_LOGIN) != 0) sb.append("禁止登录 ");
+        if ((banFlags & CommonConstant.BAN_ALL_FUNCTIONS) != 0) sb.append("全功能限制 ");
         if ((banFlags & CommonConstant.BAN_COMMENT) != 0) sb.append("评论 ");
         if ((banFlags & CommonConstant.BAN_LIKE) != 0) sb.append("点赞 ");
         if ((banFlags & CommonConstant.BAN_READ) != 0) sb.append("阅读购买 ");
+        if ((banFlags & CommonConstant.BAN_AUTHOR_WARNING) != 0) sb.append("作者警告 ");
+        if ((banFlags & CommonConstant.BAN_AUTHOR_WRITE) != 0) sb.append("封禁写书 ");
         sb.append("；封禁时长：");
         if (banDays == null || banDays < 0) {
             sb.append("永久");
@@ -256,6 +260,17 @@ public class AdminService {
             notificationService.create(author.getUserId(), "AUDIT", "作品状态变更",
                     "你的作品《" + book.getTitle() + "》已被管理员" + action + "。");
         }
+    }
+
+    /** 设置/取消小说推荐位 */
+    @Transactional(rollbackFor = Exception.class)
+    public void updateBookRecommend(Long bookId, BookRecommendDTO dto) {
+        Book book = bookMapper.selectById(bookId);
+        if (book == null) {
+            throw new BusinessException(404, "小说不存在");
+        }
+        book.setIsRecommend(dto.getIsRecommend());
+        bookMapper.updateById(book);
     }
 
     // ==================== 分类管理 ====================

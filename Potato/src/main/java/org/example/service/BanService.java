@@ -46,8 +46,9 @@ public class BanService {
             clearBan(user);
             return;
         }
-        // 全功能封禁（bit0）或指定功能被封禁
-        if ((user.getBanFlags() & CommonConstant.BAN_LOGIN) != 0
+        // 全功能限制（bit6）或禁止登录（bit0）或指定功能被封禁
+        if ((user.getBanFlags() & CommonConstant.BAN_ALL_FUNCTIONS) != 0
+                || (user.getBanFlags() & CommonConstant.BAN_LOGIN) != 0
                 || (user.getBanFlags() & banFlag) != 0) {
             String reason = user.getBanReason() != null ? "，原因：" + user.getBanReason() : "";
             String expire = user.getBanExpireTime() == null ? "永久封禁"
@@ -77,7 +78,8 @@ public class BanService {
             clearBan(user);
             return false;
         }
-        return (user.getBanFlags() & CommonConstant.BAN_LOGIN) != 0
+        return (user.getBanFlags() & CommonConstant.BAN_ALL_FUNCTIONS) != 0
+                || (user.getBanFlags() & CommonConstant.BAN_LOGIN) != 0
                 || (user.getBanFlags() & banFlag) != 0;
     }
 
@@ -113,8 +115,9 @@ public class BanService {
             clearBan(user);
             return;
         }
-        // 全功能封禁 或 封禁写书
-        if ((user.getBanFlags() & CommonConstant.BAN_LOGIN) != 0
+        // 全功能限制 或 禁止登录 或 封禁写书
+        if ((user.getBanFlags() & CommonConstant.BAN_ALL_FUNCTIONS) != 0
+                || (user.getBanFlags() & CommonConstant.BAN_LOGIN) != 0
                 || (user.getBanFlags() & CommonConstant.BAN_AUTHOR_WRITE) != 0) {
             String reason = user.getBanReason() != null ? "，原因：" + user.getBanReason() : "";
             String expire = user.getBanExpireTime() == null ? "永久封禁"

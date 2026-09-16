@@ -30,10 +30,17 @@
             <el-tag :type="bookStatusTagMap[row.status] || 'info'" size="small">{{ row.statusText }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="推荐" width="80">
+        <el-table-column label="推荐" width="90">
           <template #default="{ row }">
-            <el-tag v-if="row.isRecommend === 1" type="danger" size="small">推荐</el-tag>
-            <span v-else class="muted">-</span>
+            <el-tooltip :content="row.status === 1 || row.status === 2 ? '' : '仅上架作品可在读者端展示推荐位'" :disabled="row.status === 1 || row.status === 2">
+              <el-switch
+                v-model="row.isRecommend"
+                :active-value="1"
+                :inactive-value="0"
+                :disabled="row.status !== 1 && row.status !== 2"
+                @change="(val) => onRecommendChange(row, val)"
+              />
+            </el-tooltip>
           </template>
         </el-table-column>
         <el-table-column label="点击" width="90">
@@ -87,7 +94,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
-import { adminBookPage, updateBookStatus } from '@/api/admin'
+import { adminBookPage, updateBookStatus, updateBookRecommend } from '@/api/admin'
 import { formatTime, formatWords, bookStatusMap, bookStatusTagMap } from '@/utils/format'
 import defaultCover from '@/assets/default-cover.svg'
 
@@ -133,6 +140,26 @@ async function onStatusCmd(row, status) {
     ElMessage.success(`已${label}`)
     load()
   } catch (e) { /* 全局提示 */ }
+}
+
+async function onRecommendChange(row, val) {
+  const action = val === 1 ? '设为推荐' : '取消推荐'
+  try {
+    await ElMessageBox.confirm(
+      `确定${action}《${row.title}》吗？${val === 1 ? '设为推荐后将在读者端首页“编辑推荐”位展示。' : '取消后将从读者端首页推荐位移除。'}`,
+      '提示',
+      { type: 'warning' }
+    )
+  } catch (e) {
+    row.isRecommend = val === 1 ? 0 : 1 // 取消操作：回滚开关
+    return
+  }
+  try {
+    await updateBookRecommend(row.id, val)
+    ElMessage.success(`已${action}`)
+  } catch (e) {
+    row.isRecommend = val === 1 ? 0 : 1 // 请求失败：回滚开关
+  }
 }
 
 onMounted(load)

@@ -10,6 +10,7 @@ export const authorPage = (params) => request.get('/admin/author/page', { params
 export const auditAuthor = (id, data) => request.post(`/admin/author/${id}/audit`, data)
 export const adminBookPage = (params) => request.get('/admin/book/page', { params })
 export const updateBookStatus = (id, status) => request.put(`/admin/book/${id}/status`, { status })
+export const updateBookRecommend = (id, isRecommend) => request.put(`/admin/book/${id}/recommend`, { isRecommend })
 // 书籍审核
 export const pendingBookPage = (params) => request.get('/admin/book/pending', { params })
 export const approveBook = (id) => request.post(`/admin/book/${id}/approve`)

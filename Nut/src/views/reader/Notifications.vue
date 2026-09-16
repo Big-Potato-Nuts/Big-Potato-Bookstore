@@ -10,7 +10,7 @@
         :key="item.id"
         class="notify-item"
         :class="{ unread: item.isRead === 0 }"
-        @click="markRead(item)"
+        @click="openDetail(item)"
       >
         <span class="notify-dot" :class="{ 'is-unread': item.isRead === 0 }" />
         <div class="notify-body">
@@ -34,6 +34,21 @@
         />
       </div>
     </div>
+
+    <!-- 通知详情弹窗 -->
+    <el-dialog v-model="detailVisible" title="通知详情" width="520px">
+      <div v-if="detailItem" class="detail-content">
+        <div class="detail-head">
+          <el-tag size="small" effect="plain">{{ notificationTypeMap[detailItem.type] || detailItem.type }}</el-tag>
+          <span class="detail-title">{{ detailItem.title }}</span>
+        </div>
+        <div class="detail-time muted">{{ formatTime(detailItem.createTime) }}</div>
+        <div class="detail-body">{{ detailItem.content }}</div>
+      </div>
+      <template #footer>
+        <el-button @click="detailVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -50,6 +65,23 @@ const list = ref([])
 const total = ref(0)
 const loading = ref(false)
 const query = reactive({ page: 1, size: 10 })
+
+// 详情弹窗
+const detailVisible = ref(false)
+const detailItem = ref(null)
+
+async function openDetail(item) {
+  detailItem.value = item
+  detailVisible.value = true
+  // 打开详情时自动标记已读
+  if (item.isRead === 0) {
+    try {
+      await readNotification(item.id)
+      item.isRead = 1
+      refreshBadge()
+    } catch (e) { /* 全局提示 */ }
+  }
+}
 
 async function refreshBadge() {
   try {
@@ -147,5 +179,33 @@ onMounted(() => {
   margin: 0;
   color: #666;
   line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.detail-content {
+  padding: 8px 0;
+}
+.detail-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.detail-title {
+  font-weight: 700;
+  font-size: 16px;
+}
+.detail-time {
+  font-size: 12px;
+  margin-bottom: 16px;
+}
+.detail-body {
+  line-height: 1.8;
+  color: #333;
+  white-space: pre-wrap;
+  word-break: break-all;
+  padding: 12px;
+  background: #f8f8f8;
+  border-radius: 6px;
 }
 </style>
