@@ -1,0 +1,93 @@
+/* 全局主题变量：覆盖 Element Plus 主色，选用“书卷红” */
+:root {
+  --el-color-primary: #c4402f;
+  --el-color-primary-light-3: #d46f61;
+  --el-color-primary-light-5: #e09a90;
+  --el-color-primary-light-7: #ecc5bf;
+  --el-color-primary-light-8: #f2d8d3;
+  --el-color-primary-light-9: #f9ece9;
+  --el-color-primary-dark-2: #9d3325;
+  --el-border-radius-base: 6px;
+  --nut-header-height: 60px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+  background: #f5f6f8;
+  color: #333;
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* 通用页面容器 */
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+}
+
+.muted {
+  color: #909399;
+}
+
+/* 章节标题 */
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 28px 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title::before {
+  content: '';
+  width: 4px;
+  height: 18px;
+  background: var(--el-color-primary);
+  border-radius: 2px;
+}
+
+/* 分页容器 */
+.pagination-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+/* 书籍卡片网格 */
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 16px;
+}
+
+/* 覆盖 Element Plus 表格表头样式，更紧凑 */
+.el-table {
+  --el-table-header-bg-color: #fafafa;
+  font-size: 13px;
+}

@@ -1,0 +1,59 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: potato
+  datasource:
+    url: jdbc:mysql://localhost:3306/Potato?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: abc
+    password: Kskbl123@
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    # 开发期打印 SQL，发布前可改为 Slf4jImpl
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+
+logging:
+  level:
+    org.example.mapper: debug
+
+sa-token:
+  # 前端请求头携带的令牌名
+  token-name: Authorization
+  # 令牌有效期（秒），默认 30 天
+  timeout: 2592000
+  # 不限制活跃有效期
+  active-timeout: -1
+  # 允许多端同时登录
+  is-concurrent: true
+  is-share: true
+  token-style: uuid
+  is-log: false
+
+potato:
+  order:
+    # 未支付订单超时时间（分钟），到期后自动关闭
+    timeout-minutes: 15
+  mq:
+    # 是否启用 RocketMQ 异步消息（需要本地启动 RocketMQ 服务）
+    # false：使用进程内异步线程处理销量统计与站内通知，开箱即用
+    # true ：使用 RocketMQ 生产者/消费者，需正确配置下方 rocketmq 项
+    enabled: false
+  rocketmq:
+    name-server: 127.0.0.1:9876
+    producer-group: potato-producer-group
+    consumer-group: potato-consumer-group
+    order-paid-topic: potato-order-paid
+    order-timeout-topic: potato-order-timeout
+    # 订单超时延迟消息级别（RocketMQ 延迟级别：1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h）
+    # 14 对应 10 分钟，15 对应 20 分钟，可结合 potato.order.timeout-minutes 调整
+    timeout-delay-level: 14

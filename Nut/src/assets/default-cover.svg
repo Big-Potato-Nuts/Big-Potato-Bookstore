@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400" viewBox="0 0 300 400">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7c5cf0"/>
+      <stop offset="1" stop-color="#4a3f9e"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="400" fill="url(#g)"/>
+  <rect x="88" y="108" width="124" height="174" rx="8" fill="none" stroke="#ffffff" stroke-opacity="0.9" stroke-width="5"/>
+  <line x1="150" y1="116" x2="150" y2="274" stroke="#ffffff" stroke-opacity="0.55" stroke-width="3"/>
+  <g stroke="#ffffff" stroke-opacity="0.8" stroke-width="6" stroke-linecap="round">
+    <line x1="106" y1="150" x2="142" y2="150"/>
+    <line x1="106" y1="174" x2="142" y2="174"/>
+    <line x1="106" y1="198" x2="136" y2="198"/>
+    <line x1="158" y1="150" x2="194" y2="150"/>
+    <line x1="158" y1="174" x2="194" y2="174"/>
+    <line x1="158" y1="198" x2="188" y2="198"/>
+  </g>
+  <text x="150" y="330" text-anchor="middle" font-size="22" fill="#ffffff" fill-opacity="0.95" font-family="'PingFang SC','Microsoft YaHei',sans-serif">在线小说书城</text>
+</svg>
