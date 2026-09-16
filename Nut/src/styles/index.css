@@ -1,14 +1,25 @@
-/* 全局主题变量：覆盖 Element Plus 主色，选用“书卷红” */
+/* ============================================================
+   全局主题：七猫中文网风格 —— 暖红主色 + 红橙渐变
+   ============================================================ */
 :root {
-  --el-color-primary: #c4402f;
-  --el-color-primary-light-3: #d46f61;
-  --el-color-primary-light-5: #e09a90;
-  --el-color-primary-light-7: #ecc5bf;
-  --el-color-primary-light-8: #f2d8d3;
-  --el-color-primary-light-9: #f9ece9;
-  --el-color-primary-dark-2: #9d3325;
+  /* 主色：七猫暖红 */
+  --el-color-primary: #ff4e45;
+  --el-color-primary-light-3: #ff7a70;
+  --el-color-primary-light-5: #ffa69e;
+  --el-color-primary-light-7: #ffd1cd;
+  --el-color-primary-light-8: #ffe0dd;
+  --el-color-primary-light-9: #fff2f0;
+  --el-color-primary-dark-2: #e23c33;
+
+  /* 品牌渐变：红橙 */
+  --nut-gradient: linear-gradient(135deg, #ff8a50 0%, #ff4e45 100%);
+  --nut-gradient-deep: linear-gradient(135deg, #ff6a3d 0%, #e8352e 100%);
+
   --el-border-radius-base: 6px;
-  --nut-header-height: 60px;
+  --nut-header-height: 64px;
+  --nut-page-bg: #f6f6f8;
+  --nut-card-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  --nut-gold: #ff9c2e;
 }
 
 * {
@@ -25,7 +36,7 @@ body,
 
 body {
   font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
-  background: #f5f6f8;
+  background: var(--nut-page-bg);
   color: #333;
   -webkit-font-smoothing: antialiased;
   font-size: 14px;
@@ -40,13 +51,13 @@ a {
 .page-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px 16px 40px;
+  padding: 20px 16px 60px;
 }
 
 .card {
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--nut-card-shadow);
   padding: 20px;
 }
 
@@ -54,22 +65,23 @@ a {
   color: #909399;
 }
 
-/* 章节标题 */
+/* 章节标题（七猫风格：左侧渐变条 + 加粗标题） */
 .section-title {
-  font-size: 18px;
-  font-weight: 600;
-  margin: 28px 0 16px;
+  font-size: 19px;
+  font-weight: 700;
+  margin: 32px 0 16px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  color: #2b2b2b;
 }
 
 .section-title::before {
   content: '';
-  width: 4px;
-  height: 18px;
-  background: var(--el-color-primary);
-  border-radius: 2px;
+  width: 5px;
+  height: 20px;
+  background: var(--nut-gradient);
+  border-radius: 3px;
 }
 
 /* 分页容器 */
@@ -82,12 +94,57 @@ a {
 /* 书籍卡片网格 */
 .book-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
+  gap: 18px;
 }
 
 /* 覆盖 Element Plus 表格表头样式，更紧凑 */
 .el-table {
   --el-table-header-bg-color: #fafafa;
   font-size: 13px;
+}
+
+/* 全局主按钮：红橙渐变 */
+.el-button--primary {
+  --el-button-bg-color: var(--nut-gradient);
+  --el-button-border-color: transparent;
+  background-image: var(--nut-gradient);
+  border: none;
+  box-shadow: 0 4px 12px rgba(255, 78, 69, 0.28);
+  transition: all 0.2s;
+}
+
+.el-button--primary:hover,
+.el-button--primary:focus {
+  background-image: var(--nut-gradient-deep);
+  box-shadow: 0 6px 16px rgba(255, 78, 69, 0.36);
+  transform: translateY(-1px);
+}
+
+/* Element Plus 主色按钮（无渐变场景兜底） */
+.el-button--primary.is-plain {
+  --el-button-bg-color: var(--el-color-primary-light-9);
+  --el-button-border-color: var(--el-color-primary-light-7);
+  --el-button-text-color: var(--el-color-primary);
+}
+
+/* 链接文字颜色 */
+a:hover {
+  color: var(--el-color-primary);
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #d5d5da;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b9b9c0;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
 }

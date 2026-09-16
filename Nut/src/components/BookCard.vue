@@ -33,39 +33,47 @@ defineProps({
   background: #fff;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  transition: transform 0.22s, box-shadow 0.22s;
 }
 .book-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-5px);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.12);
 }
 .cover-wrap {
   position: relative;
   aspect-ratio: 3 / 4;
   background: #f0f0f2;
+  overflow: hidden;
 }
 .cover {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 0.3s;
 }
+.book-card:hover .cover {
+  transform: scale(1.04);
+}
+/* 推荐角标：七猫红渐变 */
 .rec-tag {
   position: absolute;
   top: 8px;
   left: 8px;
-  background: linear-gradient(135deg, #ff6a3d, #ff2e63);
+  background: var(--nut-gradient);
   color: #fff;
-  font-size: 12px;
-  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 9px;
   border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(255, 78, 69, 0.4);
 }
 .status-tag {
   position: absolute;
   bottom: 8px;
   right: 8px;
-  font-size: 12px;
+  font-size: 11px;
   padding: 2px 8px;
   border-radius: 4px;
   background: rgba(0, 0, 0, 0.55);
@@ -75,15 +83,16 @@ defineProps({
   padding: 10px 12px 14px;
 }
 .title {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
+  color: #2b2b2b;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .author {
-  font-size: 13px;
-  color: #666;
+  font-size: 12px;
+  color: #8a8a90;
   margin: 4px 0;
   white-space: nowrap;
   overflow: hidden;
@@ -93,6 +102,7 @@ defineProps({
   font-size: 12px;
   display: flex;
   gap: 10px;
+  color: #a8abb2;
 }
 .intro {
   font-size: 12px;
@@ -101,5 +111,6 @@ defineProps({
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  color: #a8abb2;
 }
 </style>

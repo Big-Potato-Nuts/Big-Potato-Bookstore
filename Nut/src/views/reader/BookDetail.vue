@@ -281,15 +281,20 @@ onMounted(() => {
 .detail-card {
   display: flex;
   gap: 28px;
-  padding: 28px;
+  padding: 30px;
+  background: linear-gradient(180deg, #fff 0%, #fffdfd 100%);
 }
 .detail-cover {
   width: 200px;
   height: 266px;
   object-fit: cover;
   border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
   flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.detail-cover:hover {
+  transform: translateY(-3px);
 }
 .detail-info {
   flex: 1;
@@ -312,7 +317,8 @@ onMounted(() => {
   line-height: 1.8;
   color: #444;
   margin: 0 0 14px;
-  background: #fafafa;
+  background: var(--el-color-primary-light-9);
+  border-left: 4px solid var(--el-color-primary);
   border-radius: 8px;
   padding: 12px 14px;
 }
